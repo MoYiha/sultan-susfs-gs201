@@ -1,4 +1,4 @@
-name: Build A15 GS201 Kernel
+name: Build gs201 kernel
 
 on:
   workflow_call:  # This allows this workflow to be called from another workflow
@@ -48,7 +48,7 @@ jobs:
           git clone https://github.com/TheWildJames/AnyKernel3.git -b "$ANYKERNEL_BRANCH"
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
           git clone https://github.com/TheWildJames/kernel_patches.git
-          git clone https://github.com/kerneltoast/android_kernel_google_gs201
+          git clone https://github.com/reddxae/android_kernel_google_gs201
       
       - name: Add KernelSU
         run: |
@@ -140,9 +140,6 @@ jobs:
         run: |
           echo "Changing to configuration directory: $CONFIG..."
           cd "$CONFIG"
-          
-          echo "Running sed commands..."
-          sed -i 's/CONFIG_LOCALVERSION="-Sultan"/CONFIG_LOCALVERSION="-Sultan-Wild+"/' ./arch/arm64/configs/gs201_defconfig
 
       - name: Build the Kernel
         run: |
@@ -169,13 +166,13 @@ jobs:
           cd ./AnyKernel3
 
           # Zip the files in the AnyKernel3 directory with a new naming convention
-          ZIP_NAME="A15_Sultan_KernelSU_SUSFS_GS201.zip"
+          ZIP_NAME="sultan-susfs-gs201.zip"
           echo "Creating zip file $ZIP_NAME..."
           zip -r "../$ZIP_NAME" ./*
           
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-gs201
+          name: sultan-susfs-gs201
           path: |
             *.zip
