@@ -1,10 +1,10 @@
-name: Build gs201 kernel
+name: Build Sultan kernel for Pixel 7 series with KernelSU Next and SUSFS
 
 on:
   workflow_call:  # This allows this workflow to be called from another workflow
   
 jobs:
-  build-kernel-a15-gs201-kernelsu-susfs:
+  build-kernel:
     runs-on: ubuntu-latest
 
     steps:
@@ -71,11 +71,11 @@ jobs:
           cp ../susfs4ksu/kernel_patches/include/linux/* ./include/linux/
 
           cd ./KernelSU-Next
-          
+
           echo "Applying next SUSFS patches..."
-          cp ../../kernel_patches/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./
+          cp ../../kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./
           patch -p1 --forward < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
-          
+
           # Change to common directory and apply SUSFS patch
           cd ..
           patch -p1 < 50_add_susfs_in_gki-android13-5.10.patch || true
@@ -85,8 +85,8 @@ jobs:
           echo "Changing to configuration directory: $CONFIG..."
           cd "$CONFIG"
           # Apply additional patch
-          cp ../kernel_patches/new_hooks.patch ./
-          patch -p1 --fuzz=3 < ./new_hooks.patch
+          cp ../kernel_patches/next/next_hooks.patch ./
+          patch -p1 --fuzz=3 < ./next_hooks.patch
 
       - name: Apply Hide Stuff Patches
         run: |
@@ -101,9 +101,8 @@ jobs:
           echo "Changing to configuration directory: $CONFIG..."
           cd "$CONFIG"
           # Apply additional patch
-          cp ../kernel_patches/sys.c_fix.patch ./
-          patch -p1 --fuzz=3 < ./sys.c_fix.patch
-
+          cp ../kernel_patches/sultan/sys.c_fix.patch ./
+          patch -p1 --fuzz=3 < sys.c_fix.patch
           sed -i "s/poofed_size: '%u'/poofed_size: '%llu'/g" ./fs/susfs.c
           sed -i "s/length of string: %u/length of string: %lu/g" ./fs/susfs.c
 
@@ -113,9 +112,12 @@ jobs:
           cd "$CONFIG"
           
           echo "Adding configuration settings to gs201_defconfig..."
+
+          # Add KSU configuration settings
+          echo "CONFIG_KSU=y" >> ./arch/arm64/configs/gs201_defconfig
+          echo "CONFIG_KSU_WITH_KPROBES=n" >> ./arch/arm64/configs/gs201_defconfig
           
           # Add SUSFS configuration settings
-          echo "CONFIG_KSU=y" >> ./arch/arm64/configs/gs201_defconfig
           echo "CONFIG_KSU_SUSFS=y" >> ./arch/arm64/configs/gs201_defconfig
           echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> ./arch/arm64/configs/gs201_defconfig
           echo "CONFIG_KSU_SUSFS_SUS_PATH=y" >> ./arch/arm64/configs/gs201_defconfig
@@ -135,11 +137,7 @@ jobs:
           
           # Add additional tmpfs config setting
           echo "CONFIG_TMPFS_XATTR=y" >> ./arch/arm64/configs/gs201_defconfig
-
-      - name: Run sed and perl Commands
-        run: |
-          echo "Changing to configuration directory: $CONFIG..."
-          cd "$CONFIG"
+          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./arch/arm64/configs/gs201_defconfig
 
       - name: Build the Kernel
         run: |
@@ -166,13 +164,13 @@ jobs:
           cd ./AnyKernel3
 
           # Zip the files in the AnyKernel3 directory with a new naming convention
-          ZIP_NAME="sultan-susfs-gs201.zip"
+          ZIP_NAME="sultan-gs201.zip"
           echo "Creating zip file $ZIP_NAME..."
           zip -r "../$ZIP_NAME" ./*
           
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: sultan-susfs-gs201
+          name: sultan-kernelsu-susfs-gs201
           path: |
             *.zip
