@@ -168,9 +168,26 @@ jobs:
           echo "Creating zip file $ZIP_NAME..."
           zip -r "../$ZIP_NAME" ./*
           
-      - name: Upload Build Artifacts
+      - name: Upload ZIP Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sultan-kernelsu-susfs-gs201
-          path: |
-            *.zip
+          name: sultan-susfs-gs201_ak3
+          path: "*.zip"
+      
+      - name: Upload Boot Image
+        uses: actions/upload-artifact@v4
+        with:
+          name: sultan-susfs-gs201_boot
+          path: "android_kernel_google_gs201/out/arch/arm64/boot/Image.lz4"
+      
+      - name: Upload DTBO Image
+        uses: actions/upload-artifact@v4
+        with:
+          name: sultan-susfs-gs201_dtbo
+          path: "android_kernel_google_gs201/out/arch/arm64/boot/dts/google/dtbo.img"
+      
+      - name: Upload Vendor Kernel Boot Image
+        uses: actions/upload-artifact@v4
+        with:
+          name: sultan-susfs-gs201_vendor_kernel_boot
+          path: "AnyKernel3/*.img"
