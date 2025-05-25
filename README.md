@@ -1,4 +1,4 @@
-Builds of Sultan Kernel with KernelSU Next and SUSFS. Only for Google Pixel 7/Pro (gs201).
+Builds of Sultan Kernel with KernelSU Next and SUSFS. Only for Google Pixel 7/a/Pro (gs201).
 
 # Changes to original repo
 * Doesn't state custom kernel name by default (no Sultan/Wild in localversion; just kernel version to keep things clean).
